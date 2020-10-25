@@ -4,7 +4,7 @@
 
 /* -- < Optimizations > -- */
 
-#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC optimize("Ofast,unroll-loops,trapv")
 #pragma GCC target("avx,avx2,fma")
 
 /* -- </Optimizations > -- */
@@ -15,9 +15,19 @@
 #include <utility> // for pair
 #include <iomanip> // for setprecision
 #include <cmath>   // for floor, round, ceil, trunc
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+// 1] find_by_order(k); returns iterator to the kth  element... (logN) func(index) > value
+// 2] order_of_key(k); returns the number of element strictly lesser than k... (logN) fucn(value) > index
 
 using namespace std;
 #define endl '\n'
+
+using namespace __gnu_pbds;
+typedef tree<int, null_type, less<int>, rb_tree_tag,
+             tree_order_statistics_node_update>
+    PBDS;
+PBDS p_set;
 
 /*
     int range : −2'147'483'648 to 2'147'483'647
@@ -35,21 +45,35 @@ const double pi = 3.1415926535897932384626;
 
 /*  -- < operator overloading > -- */
 
-template <class T>
-inline ostream &operator<<(ostream &str, vector<T> v)
-{
-    for (auto i : v)
-        cout << i << " ";
-    cout << endl;
-    return str;
-}
-
+// for vector
 template <class T>
 inline istream &operator>>(istream &str, vector<T> &v)
 {
     for (auto &i : v)
         cin >> i;
     return str;
+}
+
+template <class T>
+inline ostream &operator<<(ostream &str, vector<T> v)
+{
+    for (auto i : v)
+        cout << i << " "; // while using with vector<pair> remove " "
+    cout << endl;
+    return str;
+}
+
+// for vector<pair> and pair
+template <class T, class U>
+inline istream &operator>>(istream &str, pair<T, U> &p)
+{
+    return str >> p.first >> p.second;
+}
+
+template <class T, class U>
+inline ostream &operator<<(ostream &str, pair<T, U> p)
+{
+    return str << p.first << " " << p.second << endl;
 }
 
 /*  -- </operator overloading > -- */
@@ -116,6 +140,54 @@ void bigInt()
     {
         cout << *i;
     }
+}
+
+// miller rabin
+
+bool isprime(ll n)
+{
+    if (n < 2)
+        return false;
+    for (ll x : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37})
+    {
+        if (n == x)
+            return true;
+        bool flag = true;
+        ll r = 1;
+        ll t = 1;
+        while (r <= ((n - 1) >> __builtin_ctzll(n - 1)))
+        {
+            if (r & ((n - 1) >> __builtin_ctzll(n - 1)))
+                t = ((__int128)t * x) % n;
+            x = ((__int128)x * x) % n;
+            r <<= 1;
+        }
+        if (t == 1 || t == n - 1)
+            flag = false;
+        for (r = 0; r < __builtin_ctzll(n - 1); r++)
+        {
+            t = ((__int128)t * t) % n;
+            if (t == n - 1)
+                flag = false;
+        }
+        if (flag)
+            return false;
+    }
+    return true;
+}
+
+// fast power
+ll fastpow(ll base, ll expo)
+{
+    ll ret = 1;
+    while (expo)
+    {
+        if (expo & 1)
+            (ret *= base) %= mod;
+        expo >>= 1;
+        (base *= base) %= mod;
+    }
+    return ret;
 }
 
 /*  -- </Functions > -- */
