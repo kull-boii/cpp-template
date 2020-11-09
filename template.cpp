@@ -1,9 +1,15 @@
 /*
     Name : Aadi Manchekar
+
+    COMPILE USING :  
+    
+g++ main.cpp -Wall -Wl,--stack=268435456 -Wextra -std=c++14 -Wconversion -Wshadow -Wduplicated-cond -free -Ofast -fexceptions -ffast-math
+
+./a.out < input.txt
 */
 
 /* -- < Optimizations > -- */
-
+// check once
 #pragma GCC optimize("Ofast,unroll-loops,trapv")
 #pragma GCC target("avx,avx2,fma")
 
@@ -15,6 +21,7 @@
 #include <utility> // for pair
 #include <iomanip> // for setprecision
 #include <cmath>   // for floor, round, ceil, trunc
+#include <cstring> // for memset
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 // 1] find_by_order(k); returns iterator to the kth  element... (logN) func(index) > value
@@ -22,6 +29,18 @@
 
 using namespace std;
 #define endl '\n'
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+// some bugs
+#define log(args...)                             \
+    {                                            \
+        string _s = #args;                       \
+        replace(_s.begin(), _s.end(), ',', ' '); \
+        stringstream _ss(_s);                    \
+        istream_iterator<string> _it(_ss);       \
+        err(_it, args);                          \
+    }
 
 using namespace __gnu_pbds;
 typedef tree<int, null_type, less<int>, rb_tree_tag,
@@ -55,7 +74,7 @@ inline istream &operator>>(istream &str, vector<T> &v)
 }
 
 template <class T>
-inline ostream &operator<<(ostream &str, vector<T> v)
+inline ostream &operator<<(ostream &str, const vector<T> v)
 {
     for (auto i : v)
         cout << i << " "; // while using with vector<pair> remove " "
@@ -71,9 +90,70 @@ inline istream &operator>>(istream &str, pair<T, U> &p)
 }
 
 template <class T, class U>
-inline ostream &operator<<(ostream &str, pair<T, U> p)
+inline ostream &operator<<(ostream &str, const pair<T, U> p)
 {
     return str << p.first << " " << p.second << endl;
+}
+
+template <typename T>
+T gcd(T a, T b) { return (b ? __gcd(a, b) : a); }
+template <typename T>
+T lcm(T a, T b) { return (a * (b / gcd(a, b))); }
+int add(int a, int b, int c)
+{
+    int res = a + b;
+    return (res >= c ? res - c : res);
+}
+int mod_neg(int a, int b, int c)
+{
+    int res;
+    if (abs(a - b) < c)
+        res = a - b;
+    else
+        res = (a - b) % c;
+    return (res < 0 ? res + c : res);
+}
+int mul(int a, int b, int c)
+{
+    LL res = (LL)a * b;
+    return (res >= c ? res % c : res);
+}
+LL mulmod(LL a, LL b, LL m)
+{
+    LL q = (LL)(((LD)a * (LD)b) / (LD)m);
+    LL r = a * b - q * m;
+    if (r > m)
+        r %= m;
+    if (r < 0)
+        r += m;
+    return r;
+}
+template <typename T>
+T extended_euclid(T a, T b, T &x, T &y)
+{
+    T xx = 0, yy = 1;
+    y = 0;
+    x = 1;
+    while (b)
+    {
+        T q = a / b, t = b;
+        b = a % b;
+        a = t;
+        t = xx;
+        xx = x - q * xx;
+        x = t;
+        t = yy;
+        yy = y - q * yy;
+        y = t;
+    }
+    return a;
+}
+template <typename T>
+T mod_inverse(T a, T n)
+{
+    T x, y, z = 0;
+    T d = extended_euclid(a, n, x, y);
+    return (d > 1 ? -1 : mod_neg(x, z, n));
 }
 
 /*  -- </operator overloading > -- */
@@ -104,9 +184,9 @@ void bigInt()
     reverse(firstNo.begin(), firstNo.end());
     reverse(secondNo.begin(), secondNo.end());
 
-    long long length = min(firstNo.size(), secondNo.size());
+    unsigned long length = min(firstNo.size(), secondNo.size());
     int carry(0), val(0);
-    for (int i = 0; i < length; i++)
+    for (unsigned int i = 0; i < length; i++)
     {
         val = firstNo[i] + secondNo[i] + carry;
         carry = val / 10;
@@ -114,7 +194,7 @@ void bigInt()
     }
     if (firstNo.size() > length)
     {
-        for (int i = length; i < firstNo.size(); i++)
+        for (unsigned long i = length; i < firstNo.size(); i++)
         {
             val = firstNo[i] + carry;
             carry = val / 10;
@@ -123,7 +203,7 @@ void bigInt()
     }
     if (secondNo.size() > length)
     {
-        for (int i = length; i < secondNo.size(); i++)
+        for (unsigned long i = length; i < secondNo.size(); i++)
         {
             val = secondNo[i] + carry;
             carry = val / 10;
@@ -144,17 +224,17 @@ void bigInt()
 
 // miller rabin
 
-bool isprime(ll n)
+bool isprime(long long n)
 {
     if (n < 2)
         return false;
-    for (ll x : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37})
+    for (long long x : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37})
     {
         if (n == x)
             return true;
         bool flag = true;
-        ll r = 1;
-        ll t = 1;
+        long long r = 1;
+        long long t = 1;
         while (r <= ((n - 1) >> __builtin_ctzll(n - 1)))
         {
             if (r & ((n - 1) >> __builtin_ctzll(n - 1)))
@@ -177,9 +257,9 @@ bool isprime(ll n)
 }
 
 // fast power
-ll fastpow(ll base, ll expo)
+long long fastpow(long long base, long long expo)
 {
-    ll ret = 1;
+    long long ret = 1;
     while (expo)
     {
         if (expo & 1)
@@ -190,15 +270,29 @@ ll fastpow(ll base, ll expo)
     return ret;
 }
 
+// mt19937_64 rang(chrono::high_resolution_clock::now().time_since_epoch().count());
+// int rng(int lim)
+// {
+//     uniform_int_distribution<int> uid(0, lim - 1);
+//     return uid(rang);
+// }
+// mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
 /*  -- </Functions > -- */
 
-int main()
+int32_t main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
+    srand(chrono::high_resolution_clock::now().time_since_epoch().count());
 
-    cout << fixed << setprecision(10);
+    // cout << fixed << setprecision(10);
+
+    // memset(a,0,sizeof(a)); // initialize with 0
+    // memset(a,-1,sizeof(a)); // initializing with -1
+    // memset(a,0xc0,sizeof(a)); // initializing with negative infinity
+    // memset(a,0x3f,sizeof(a)); // initializing with positive infinity
 
     return 0;
 }
