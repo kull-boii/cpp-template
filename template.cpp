@@ -3,7 +3,7 @@
 
     COMPILE USING :  
     
-g++ main.cpp -Wall -Wl,--stack=268435456 -Wextra -std=c++14 -Wconversion -Wshadow -Wduplicated-cond -free -Ofast -fexceptions -ffast-math
+g++ main.cpp -Wall -Wl,--stack=268435456 -Wextra -std=c++14 -Wconversion -Wshadow -Wduplicated-cond -Wreturn-stack-address -free -Ofast -fexceptions -ffast-math
 
 ./a.out < input.txt
 */
