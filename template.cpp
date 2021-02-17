@@ -76,7 +76,7 @@ inline istream &operator>>(istream &str, vector<T> &v)
 template <class T>
 inline ostream &operator<<(ostream &str, const vector<T> v)
 {
-    for (auto i : v)
+    for (auto const &i : v)
         cout << i << " "; // while using with vector<pair> remove " "
     cout << endl;
     return str;
